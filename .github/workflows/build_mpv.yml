@@ -11,7 +11,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        arch: [armv7, arm64, x86, x86_64]
+        arch: [armv7l, arm64, x86, x86_64]
       fail-fast: false
 
     steps:
