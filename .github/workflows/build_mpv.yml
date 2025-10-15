@@ -1,0 +1,41 @@
+name: Build libmpv for all Android architectures
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        arch: [armv7, arm64, x86, x86_64]
+      fail-fast: false
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Make all shell scripts executable
+        run: |
+          find . -type f -name "*.sh" -exec chmod +x {} \;
+
+      - name: Download Dependencies (SDK + Deps)
+        run: ./download.sh
+
+      - name: Build mpv for ${{ matrix.arch }}
+        run: ./buildall.sh --arch ${{ matrix.arch }} mpv
+
+      - name: Upload libmpv artifacts for ${{ matrix.arch }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: libmpv-${{ matrix.arch }}
+          path: |
+            prefix/${{ matrix.arch }}/lib/
+            prefix/${{ matrix.arch }}/include/
+
+      - name: Clean after build
+        if: always()
+        run: ./mpv-android.sh clean
