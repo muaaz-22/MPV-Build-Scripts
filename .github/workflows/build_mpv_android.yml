@@ -1,0 +1,46 @@
+name: Build full mpv-android app (all architectures)
+
+on:
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Install dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y git python3 python3-pip pkg-config yasm nasm ninja-build \
+              autoconf automake libtool make cmake unzip openjdk-17-jdk
+
+      - name: Make all shell scripts executable
+        run: find . -type f -name "*.sh" -exec chmod +x {} \;
+
+      - name: Download sources
+        run: ./buildscripts/download.sh
+
+      - name: Apply patches
+        run: ./buildscripts/patch.sh
+
+      - name: Build everything (full clean build)
+        run: |
+          cd buildscripts
+          ./buildall.sh -f
+
+      - name: Upload built APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: mpv-android-apk
+          path: app/build/outputs/apk/default/debug/app-default-universal-debug.apk
+
+      - name: Upload built libraries
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: libmpv-libs
+          path: |
+            buildscripts/prefix/

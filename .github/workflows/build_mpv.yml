@@ -1,9 +1,6 @@
 name: Build libmpv for all Android architectures
 
 on:
-  push:
-    branches:
-      - main
   workflow_dispatch:
 
 jobs:
