@@ -35,7 +35,3 @@ jobs:
           path: |
             prefix/${{ matrix.arch }}/lib/
             prefix/${{ matrix.arch }}/include/
-
-      - name: Clean after build
-        if: always()
-        run: ./mpv-android.sh clean

@@ -6,41 +6,39 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        arch: [armv7l, arm64, x86, x86_64]
+      fail-fast: false
 
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Install dependencies
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y git python3 python3-pip pkg-config yasm nasm ninja-build \
-              autoconf automake libtool make cmake unzip openjdk-17-jdk
+      - name: Install NASM
+        run: sudo apt-get update && sudo apt-get install -y nasm
 
       - name: Make all shell scripts executable
-        run: find . -type f -name "*.sh" -exec chmod +x {} \;
-
-      - name: Download sources
-        run: ./buildscripts/download.sh
-
-      - name: Apply patches
-        run: ./buildscripts/patch.sh
-
-      - name: Build everything (full clean build)
         run: |
-          cd buildscripts
-          ./buildall.sh -f
+          find . -type f -name "*.sh" -exec chmod +x {} \;
 
-      - name: Upload built APK
+      - name: Download Dependencies (SDK + Deps)
+        run: ./download.sh
+
+      - name: Build for ${{ matrix.arch }}
+        run: ./buildall.sh --arch ${{ matrix.arch }}
+
+      - name: Upload libmpv artifacts for ${{ matrix.arch }}
         uses: actions/upload-artifact@v4
         with:
-          name: mpv-android-apk
-          path: app/build/outputs/apk/default/debug/app-default-universal-debug.apk
-
-      - name: Upload built libraries
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: libmpv-libs
+          name: libmpv-${{ matrix.arch }}
           path: |
-            buildscripts/prefix/
+            prefix/${{ matrix.arch }}/lib/
+            prefix/${{ matrix.arch }}/include/
+
+      - name: Upload built APKs
+        if: always() # ensures upload even if earlier step failed
+        uses: actions/upload-artifact@v4
+        with:
+          name: mpv-android-apks
+          path: app/build/outputs/apk/**/*.apk
