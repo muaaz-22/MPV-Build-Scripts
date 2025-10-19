@@ -121,6 +121,12 @@ build () {
 	if [ "$1" == "mpv-android" ]; then
 		pushd ..
 		BUILDSCRIPT=./scripts/$1.sh
+		echo "---------------------------------------"
+		echo "🔧 Debug Info:"
+		echo "Current directory: $(pwd)"
+		echo "Build script path: $BUILDSCRIPT"
+		echo "---------------------------------------"
+
 	else
 		pushd deps/$1
 		BUILDSCRIPT=../../scripts/$1.sh
