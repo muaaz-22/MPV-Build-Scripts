@@ -119,8 +119,7 @@ build () {
 	fi
 	printf >&2 '\e[1;34m%s\e[m\n' "Building $1..."
 	if [ "$1" == "mpv-android" ]; then
-		pushd ..
-		BUILDSCRIPT=./scripts/$1.sh
+		BUILDSCRIPT=scripts/$1.sh
 		echo "---------------------------------------"
 		echo "🔧 Debug Info:"
 		echo "Current directory: $(pwd)"
